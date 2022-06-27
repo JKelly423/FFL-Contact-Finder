@@ -1,0 +1,19 @@
+{
+  "siteDetails" : {
+    "pageURL" : "https://www.fflregistry.com/FFL-Dealers-Location/"
+  },
+  "chromeOptions" : {
+    "executablePath" : "C:\\Program Files (x86)\\Google\\Chrome\\Application\\chrome.exe",
+    "headless" : true,
+    "slowMo" : 0,
+    "defaultViewport" : null
+  },
+  "cssSelectors" : {
+    "table" : "#ext-gen9 > div > table"
+  },
+  "querySelectors" : {
+    "rows" : "table.x-grid3-row-table > tbody ,",
+    "shortInfo" : "table.x-grid3-row-table > tbody > tr ",
+    "longInfo" : "table.x-grid3-row-table > tbody > tr.x-grid3-row-body-tr"
+  }
+}
