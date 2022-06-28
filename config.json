@@ -12,8 +12,16 @@
     "table" : "#ext-gen9 > div > table"
   },
   "querySelectors" : {
-    "rows" : "table.x-grid3-row-table > tbody ,",
-    "shortInfo" : "table.x-grid3-row-table > tbody > tr ",
-    "longInfo" : "table.x-grid3-row-table > tbody > tr.x-grid3-row-body-tr"
+    "rows" : "table.x-grid3-row-table > tbody > tr",
+    "companyName" : "table.x-grid3-row-table > tbody > tr > td.x-grid3-col.x-grid3-cell.x-grid3-td-contact",
+    "companyPage" : "table.x-grid3-row-table > tbody > tr > td.x-grid3-col.x-grid3-cell.x-grid3-td-contact > div > a",
+    "preferredDealer" : "table.x-grid3-row-table > tbody > tr > td.x-grid3-col.x-grid3-cell.x-grid3-td-2",
+    "companyType" : "table.x-grid3-row-table > tbody > tr > td.x-grid3-col.x-grid3-cell.x-grid3-td-3",
+    "city" : "table.x-grid3-row-table > tbody > tr > td.x-grid3-col.x-grid3-cell.x-grid3-td-4",
+    "state" : "table.x-grid3-row-table > tbody > tr > td.x-grid3-col.x-grid3-cell.x-grid3-td-5",
+    "phone" : "table.x-grid3-row-table > tbody > tr > td.x-grid3-col.x-grid3-cell.x-grid3-td-6",
+    "longInfo" : "table.x-grid3-row-table > tbody > tr.x-grid3-row-body-tr > td.x-grid3-body-cell > div.x-grid3-row-body > div > table.result_table",
+    "companyPage_name" : "body > div.w3-content.w3-container.w3-padding-64 > h1",
+    "links" : "table.x-grid3-row-table > tbody > tr > td.x-grid3-col.x-grid3-cell.x-grid3-td-contact > div > a"
   }
 }

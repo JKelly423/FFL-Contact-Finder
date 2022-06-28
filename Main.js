@@ -10,7 +10,7 @@ const CONFIG = require('./config.json');
 const STATES_FILE = require('./states.json');
 
 const fs = require('fs');
-const {Cluster} = require('puppeteer-cluster'); // Create puppeteer-cluster for concurrent operations
+const {Cluster} = require('puppeteer-cluster'); // Use puppeteer-cluster for concurrent operations
 
 const timeout = millis => new Promise(resolve => setTimeout(resolve, millis));  // Declare timeout for web requests
 
@@ -33,32 +33,52 @@ for(let state of STATES_FILE.states) {
 
     /* Define a Cluster Task */
     await cluster.task(async ({ page, data: url }) => {
-        const grabFromRow = (row, classname) => row
-            .querySelector(`td.${classname}`)   // grab the TD with the classname
-            .innerText                          // grab the text
-            .trim();                            // trim the text to remove spaces
-
         /* Go to specified URL */
         await page.goto(url);
 
         /* Wait for page's table to load before evaluating*/
         try {
             await page.waitForSelector(CONFIG.cssSelectors.table, {
-                timeout: 3000
+                timeout: timeout
             });
-            console.log(`${url} | Table Loaded`);
         } catch (error) {
             console.log(`\nProblem loading table | ${url}`);
+            console.log(error);
         }
 
-        /* Evaluate the table */
-        // Note to self: Pulling each company URL from the table and then evaluating the page is the most efficient way to do this; as there is an unknown amount of data in the table
+        /* Grab all links to individual pages from table */
+        try{
+            var contactPageURLs = await page.evaluate(() => {
+                let arr = Array.from(document.querySelectorAll('table.x-grid3-row-table > tbody > tr > td.x-grid3-col.x-grid3-cell.x-grid3-td-contact > div > a'));
+                console.log("Len: " + arr.length);
+                return arr.map(a => a.href);
+            });
+        } catch(error) {
+            console.log(error);
+        }
+
+        console.log("\nEvaluated Table");
+        console.log(contactPageURLs);
+        /* Go to each contact page and evaluate it*/
+        for(let contactPageURL of contactPageURLs) {
+            await page.goto(contactPageURL);
+            console.log(`\nEvaluating Contact Page | ${contactPageURL}`);
+            try {
+                let name = await page.evaluate(() => {
+                    let selector = 'body > div.w3-content.w3-container.w3-padding-64 > h1';
+                    return document.querySelector(selector).innerText;
+                });
+                console.log(`\nName: ${name}`);
+            } catch (error){
+                console.log(error);
+            }
+        }
     });
 
     /* Queue each URL for Tasking */
     for(let url of urls) {
-        cluster.queue(url); // Queue each url
-        console.log("qued " + url);
+        await cluster.queue(url); // Queue each url
+        console.log("queued " + url);
     }
 
     /* Wait for all tasks to finish */
@@ -66,4 +86,3 @@ for(let state of STATES_FILE.states) {
     /* Close the Cluster */
     await cluster.close();
 })();
-
