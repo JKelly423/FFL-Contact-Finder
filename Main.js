@@ -57,19 +57,88 @@ for(let state of STATES_FILE.states) {
             console.log(error);
         }
 
+        /* Display browser's console within program console */
+        page.on('console', async (msg) => {
+            const msgArgs = msg.args();
+            for (let i = 0; i < msgArgs.length; ++i) {
+                console.log(await msgArgs[i].jsonValue());
+            }
+        });
+
         console.log("\nEvaluated Table");
         console.log(contactPageURLs);
+
         /* Go to each contact page and evaluate it*/
         for(let contactPageURL of contactPageURLs) {
             await page.goto(contactPageURL);
             console.log(`\nEvaluating Contact Page | ${contactPageURL}`);
+            /* Evaluate the contact's name */
             try {
                 let name = await page.evaluate(() => {
-                    let selector = 'body > div.w3-content.w3-container.w3-padding-64 > h1';
-                    return document.querySelector(selector).innerText;
+                    let licenseeNameSelector = 'body > div.w3-content.w3-container.w3-padding-64 > h1';
+                    let result = document.querySelector(licenseeNameSelector);
+                    $(result).remove(); // Remove the name from the page to allow easier navigation of remaining elements
+                    var count = (result.innerHTML.match(/<br>/g) || []).length;
+                    console.log(`Count: ${count}`);
+                    if(count > 1) {
+
+                        let splitName = result.innerHTML.trim().split("<br>");
+                        console.log(`${splitName[0]} | ${splitName[1]}`);
+                        return splitName[0] + " | " + splitName[1];
+                    }
+                    return result.innerText.trim();
                 });
+
                 console.log(`\nName: ${name}`);
             } catch (error){
+                console.log(error);
+            }
+            /* Evaluate the contact's address */
+            try {
+                let website = "";
+                let phone = "";
+                let address = await page.evaluate(() => {
+                    let addressSelector = "body > div.w3-content.w3-container.w3-padding-64";
+                    let addressReponseRaw = (document.querySelector(addressSelector).innerHTML).toString();    // Save the raw response to be formatted
+                    addressReponseRaw = addressReponseRaw.substring(0,addressReponseRaw.indexOf("<table"));
+                    while(addressReponseRaw.indexOf("\n") > -1){
+                        addressReponseRaw = addressReponseRaw.replace("\n",""); // Remove table data from the address innerText
+                    }
+                    /* Format web address to remove <a href> tags */
+                    if (addressReponseRaw.indexOf("(Web)") > -1) {
+                        website = addressReponseRaw.substring((addressReponseRaw.indexOf("<a href=\"") + 9), addressReponseRaw.indexOf("\" target="));
+                        console.log(`Website prior: ${website}`);
+                        addressReponseRaw = addressReponseRaw.substring(0,addressReponseRaw.indexOf("<a href=") );
+                    }
+                    /* Split the address/website/phone into an array for processing */
+                    console.log(`Response Object RAW: ${addressReponseRaw}`);
+                    let responseObj = addressReponseRaw.split("<br>");
+                    let finalObj = [];
+                    console.log(`\nResponse Obj: ${responseObj}`);
+                    /* Loop through the array filtering & removing empty elements */
+                    for (let elem in responseObj) {
+                        elem = responseObj[elem].toString();
+                        if (elem.indexOf("(Phone)") > -1){
+                            elem = elem.replace("(Phone)", "");
+                            phone = elem.replace("(","").replace(")","").replace("/-/g",""); // Remove parentheses and dashes from phone number
+                        } else if (elem !== ""){
+                            finalObj.push(elem);
+                        }
+
+                    }
+                    finalObj.push("United States");
+                    console.log(finalObj)
+                    return finalObj.join("\n"); // Split the address into lines
+                });
+
+                if (website != "") {
+                    console.log(`Website: ${website}`);
+                }
+                if (phone != "") {
+                    console.log(`Phone: ${phone}`);
+                }
+                console.log(`Address: ${address}`);
+            } catch(error){
                 console.log(error);
             }
         }
@@ -78,7 +147,6 @@ for(let state of STATES_FILE.states) {
     /* Queue each URL for Tasking */
     for(let url of urls) {
         await cluster.queue(url); // Queue each url
-        console.log("queued " + url);
     }
 
     /* Wait for all tasks to finish */
