@@ -1,4 +1,5 @@
 {
+  "savePath": "./validResultsCSV/USA-FFL-Holders.csv",
   "siteDetails" : {
     "pageURL" : "https://www.fflregistry.com/FFL-Dealers-Location/"
   },
