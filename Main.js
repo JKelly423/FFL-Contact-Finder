@@ -1,11 +1,3 @@
-
-/*
-USEFUL LINKS
-============
-https://medium.com/@rishabhpriyadarshi/web-scrapping-with-puppeteer-some-basic-examples-7b20524b6a93/
-https://www.fflregistry.com/
- */
-
 const CONFIG = require('./config.json');    // json file containing lengthy data such as CSS selectors, save paths, and URLs.
 const STATES_FILE = require('./states.json');   // json file containing all the state's abbreviations and names.
 const puppeteer = require('puppeteer'); // Use puppeteer to scrape the FFL Registry contact links before queuing the cluster tasks. Done to isolate cluster.task and remove for loop inside of cluster.task
